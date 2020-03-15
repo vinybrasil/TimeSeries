@@ -126,7 +126,62 @@ plotMovingAverage(currency, 7, plot_intervals=True, plot_anomalies=True)
 plt.show()
 '''
 
-#
+#media móvel ponderada: sendo n o len do vetor de pesos, a média pondera o valor no tempo t com os valores de t-1, t-2,...,t-n e dps soma tudo, sendo 
+#esse o valor no t-ésimo período
+
+def weighted_average(series, weights):
+    result = 0.0
+    weights.reverse()
+    for n in range(len(weights)):
+        result += series.iloc[-n-1] * weights[n]
+    return float(result)
+    
+print("Média ponderada nos últimos três perídos: %f" %  weighted_average(ads, [0.6, 0.3, 0.1])) #os pesos somam 1 e os y mais recentes tem mais peso
+
+#exponential smoothing: usa toda a available data, dando exponencialmente menos pesos para os valores mais longes de t
+
+def exponential_smoothing(series, alpha):
+    result = [series[0]]
+    for n in range(1, len(series)):
+        result.append(alpha * series[n] + (1 - alpha) * result[n-1])
+    return result
+
+def plotExponentialSmoothing(series, alphas):
+    with plt.style.context('seaborn-white'):
+        plt.figure(figsize=(13.4,6.2))
+        for alpha in alphas: 
+            plt.plot(exponential_smoothing(series, alpha), label="Alpha {}".format(alpha))
+        plt.plot(series.values, "c", label="Actual")
+        plt.legend(loc="best")
+        plt.axis('tight')
+        plt.title("Exponential Smoothing")
+        plt.grid(True)
+
+
+
+plotExponentialSmoothing(ads.Ads, [0.3, 0.05])
+plotExponentialSmoothing(currency.GEMS_GEMS_SPENT, [0.3,0.05])
+#plt.show()
+
+#double exponential smoothing: decompondo a série, temos dois componentes: o intercepto e a trend(que foi descoberto ali em cima).
+
+def double_exponential_smoothing(series, alpha, beta):
+    result = [series[0]]
+    for n in range(1, len(series)+1):
+        if n == 1:
+            level, trend = series[0], series[1] - series[0]
+        if n >= len(series):
+            value = result[-1]
+        else:
+            value = series[n]
+        last_level, level = level, alpha*value + (1-alpha)*(level+trend)
+        trend = beta*(level-last_level) + (1-beta)*trend
+        result.append(level+trend)
+    return result
+
+def plotDoubleExponentialSmoothing(series, alphas, betas):
+    
+        
 
 
 print("salve")
