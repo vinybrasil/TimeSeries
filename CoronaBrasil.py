@@ -42,6 +42,8 @@ def plotar(row):
     plt.title("COVID 19 em 14/03 no Brasil")
     plt.grid(True)
     plt.show()
+    
+    
 def main():
     coronga = pd.read_csv('./data/corona.csv')
     
